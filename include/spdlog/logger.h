@@ -58,7 +58,24 @@ public:
     // Logger with single sink
     logger(std::string name, sink_ptr single_sink)
         : logger(std::move(name), {std::move(single_sink)})
-    {}
+    {
+        if (getenv("LOGLEVEL"))
+        {
+            std::string loglevel = getenv("LOGLEVEL");
+            std::transform(loglevel.begin(), loglevel.end(), loglevel.begin(), ::toupper);
+            if (loglevel == "DEBUG") {
+                level_.store(level::debug);
+            } else if (loglevel == "TRACE") {
+                level_.store(level::trace);
+            } else if (loglevel.substr(0,4) == "WARN") {
+                level_.store(level::warn);
+            } else if (loglevel == "ERROR") {
+                level_.store(level::err);
+            } else {
+                level_.store(level::info);
+            }
+        }
+    }
 
     // Logger with sinks init list
     logger(std::string name, sinks_init_list sinks)
